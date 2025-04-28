@@ -10,6 +10,7 @@ import pdfkit
 import hashlib
 import sqlite3
 import requests   # new – used to verify captcha
+from google.oauth2 import service_account
 print("Starting LinkGuard Scanner...")
 app = Flask(__name__)
 app.secret_key = "your-secret-key-here"  # Replace with a secure key in production
@@ -406,10 +407,18 @@ project_id     = "linkguardbot-njfk"
 dialogflow_sid = "linkguard-session"
 language_code  = "en"
 
-session_client      = dialogflow.SessionsClient.from_service_account_json(
-                          "dialogflow_credentials.json")
-dialogflow_session  = session_client.session_path(project_id, dialogflow_sid)
+# Dialogflow setup
+project_id = "linkguardbot-njfk"
+dialogflow_sid = "linkguard-session"
+language_code = "en"
 
+# Load Dialogflow credentials from environment variable
+credentials_json = os.getenv("DIALOGFLOW_CREDENTIALS")
+credentials_dict = json.loads(credentials_json)
+credentials = service_account.Credentials.from_service_account_info(credentials_dict)
+session_client = dialogflow.SessionsClient(credentials=credentials)
+dialogflow_session = session_client.session_path(project_id, dialogflow_sid)
+print("Dialogflow session initialized")
 
 # Simulation URLs
 simulation_urls = [
