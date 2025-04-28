@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkGuard Scanner - Simulation Mode</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts for Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-end mb-3">
+            <button id="themeToggle" class="btn btn-secondary">Toggle Light Mode</button>
+        </div>
+        <h1 class="text-center mb-4">LinkGuard Scanner - Simulation Mode</h1>
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <div class="progress-indicator" id="progress" style="display: none;">Question 1 of 5</div>
+                <div class="timer">
+                    Time Left: <span id="timer">30</span>s
+                </div>
+                <div id="buttonContainer" class="button-container">
+                    <button class="btn btn-gold" onclick="startSimulation(5)">5 Questions</button>
+                    <button class="btn btn-gold" onclick="startSimulation(10)">10 Questions</button>
+                    <button class="btn btn-gold" onclick="startSimulation(20)">20 Questions</button>
+                </div>
+                <div id="simulation" style="display: none;" class="question-container">
+                    <p id="currentUrl" class="mb-3"></p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-primary" onclick="guess(true)">Yes (Phishing)</button>
+                        <button class="btn btn-primary" onclick="guess(false)">No (Safe)</button>
+                    </div>
+                </div>
+                <div id="feedback" class="mt-3 text-center"></div>
+                <div class="button-row">
+                    <a href="/" class="btn btn-secondary">Back to Scanner</a>
+                    <button class="btn btn-secondary" onclick="resetSimulation()" style="display: none;" id="resetButton">Restart Simulation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <script>
+        let currentIndex = 0;
+        let correctGuesses = 0;
+        let timerId = null;
+        let selectedQuestions = 5;
+        const links = [
+            {"url": "http://192.168.1.1/login", "is_phishing": true},
+            {"url": "http://secure.login.bank.example.com/update", "is_phishing": true},
+            {"url": "http://123.456.78.90/verify", "is_phishing": true},
+            {"url": "http://login.secure.account.free-offer.com", "is_phishing": true},
+            {"url": "http://update.bank.credentials.com", "is_phishing": true},
+            {"url": "http://192.168.0.1/sign-in", "is_phishing": true},
+            {"url": "http://verify.account.offer.example.com", "is_phishing": true},
+            {"url": "http://secure.login.free.update.com", "is_phishing": true},
+            {"url": "http://123.45.67.89/password", "is_phishing": true},
+            {"url": "http://login.bank.scam.com", "is_phishing": true},
+            {"url": "http://192.168.1.100/confirm", "is_phishing": true},
+            {"url": "http://secure.account.phishing.example.com", "is_phishing": true},
+            {"url": "http://update.credentials.free.com", "is_phishing": true},
+            {"url": "http://123.456.78.101/verify-account", "is_phishing": true},
+            {"url": "http://login.secure.offer.bank.com", "is_phishing": true},
+            {"url": "http://192.168.0.2/signin", "is_phishing": true},
+            {"url": "http://secure.update.free.example.com", "is_phishing": true},
+            {"url": "http://123.45.67.90/password-reset", "is_phishing": true},
+            {"url": "http://login.bank.fraud.com", "is_phishing": true},
+            {"url": "http://192.168.1.200/confirm-account", "is_phishing": true},
+            {"url": "http://secure.login.phishing-bank.com", "is_phishing": true},
+            {"url": "http://update.credentials.scam.com", "is_phishing": true},
+            {"url": "http://123.456.78.102/verify-login", "is_phishing": true},
+            {"url": "http://login.secure.offer.example.com", "is_phishing": true},
+            {"url": "http://192.168.0.3/sign-up", "is_phishing": true},
+            {"url": "http://secure.update.free-bank.com", "is_phishing": true},
+            {"url": "http://123.45.67.91/password-change", "is_phishing": true},
+            {"url": "http://login.bank.malware.com", "is_phishing": true},
+            {"url": "http://192.168.1.300/confirm-email", "is_phishing": true},
+            {"url": "http://secure.login.phishing-offer.com", "is_phishing": true},
+            {"url": "https://google.com", "is_phishing": false},
+            {"url": "https://example.com", "is_phishing": false},
+            {"url": "https://youtube.com", "is_phishing": false},
+            {"url": "https://facebook.com", "is_phishing": false},
+            {"url": "https://twitter.com", "is_phishing": false},
+            {"url": "https://linkedin.com", "is_phishing": false},
+            {"url": "https://reddit.com", "is_phishing": false},
+            {"url": "https://wikipedia.org", "is_phishing": false},
+            {"url": "https://amazon.com", "is_phishing": false},
+            {"url": "https://ebay.com", "is_phishing": false},
+            {"url": "https://microsoft.com", "is_phishing": false},
+            {"url": "https://apple.com", "is_phishing": false},
+            {"url": "https://netflix.com", "is_phishing": false},
+            {"url": "https://instagram.com", "is_phishing": false},
+            {"url": "https://pinterest.com", "is_phishing": false},
+            {"url": "https://stackoverflow.com", "is_phishing": false},
+            {"url": "https://github.com", "is_phishing": false},
+            {"url": "https://bbc.com", "is_phishing": false},
+            {"url": "https://cnn.com", "is_phishing": false},
+            {"url": "https://nytimes.com", "is_phishing": false},
+            {"url": "https://washingtonpost.com", "is_phishing": false},
+            {"url": "https://forbes.com", "is_phishing": false},
+            {"url": "https://bloomberg.com", "is_phishing": false},
+            {"url": "https://reuters.com", "is_phishing": false},
+            {"url": "https://theguardian.com", "is_phishing": false},
+            {"url": "https://aljazeera.com", "is_phishing": false},
+            {"url": "https://bbc.co.uk", "is_phishing": false},
+            {"url": "https://cnbc.com", "is_phishing": false},
+            {"url": "https://wsj.com", "is_phishing": false},
+            {"url": "https://ft.com", "is_phishing": false},
+            {"url": "https://economist.com", "is_phishing": false},
+            {"url": "https://time.com", "is_phishing": false},
+            {"url": "https://newsweek.com", "is_phishing": false},
+            {"url": "https://huffpost.com", "is_phishing": false},
+            {"url": "https://apnews.com", "is_phishing": false},
+            {"url": "https://npr.org", "is_phishing": false},
+            {"url": "https://abcnews.go.com", "is_phishing": false},
+            {"url": "https://cbsnews.com", "is_phishing": false},
+            {"url": "https://nbcnews.com", "is_phishing": false},
+            {"url": "https://foxnews.com", "is_phishing": false},
+            {"url": "https://usatoday.com", "is_phishing": false},
+            {"url": "https://latimes.com", "is_phishing": false},
+            {"url": "https://chicagotribune.com", "is_phishing": false},
+            {"url": "https://nydailynews.com", "is_phishing": false},
+            {"url": "https://sfgate.com", "is_phishing": false},
+            {"url": "https://seattletimes.com", "is_phishing": false},
+            {"url": "https://denverpost.com", "is_phishing": false},
+            {"url": "https://houstonchronicle.com", "is_phishing": false},
+            {"url": "https://dallasnews.com", "is_phishing": false},
+            {"url": "https://azcentral.com", "is_phishing": false},
+            {"url": "https://oregonlive.com", "is_phishing": false},
+            {"url": "https://miamiherald.com", "is_phishing": false},
+            {"url": "https://tampabay.com", "is_phishing": false},
+            {"url": "https://ajc.com", "is_phishing": false},
+            {"url": "https://kansascity.com", "is_phishing": false},
+            {"url": "https://startribune.com", "is_phishing": false},
+            {"url": "https://jsonline.com", "is_phishing": false},
+            {"url": "https://post-gazette.com", "is_phishing": false},
+            {"url": "https://detroitnews.com", "is_phishing": false},
+            {"url": "https://philly.com", "is_phishing": false},
+            {"url": "https://bostonglobe.com", "is_phishing": false},
+            {"url": "https://sltrib.com", "is_phishing": false},
+            {"url": "https://sacbee.com", "is_phishing": false}
+        ];
+
+        function startSimulation(numQuestions) {
+            selectedQuestions = numQuestions;
+            currentIndex = 0;
+            correctGuesses = 0;
+            const shuffledLinks = links.sort(() => 0.5 - Math.random()).slice(0, selectedQuestions);
+            localStorage.setItem('simulationLinks', JSON.stringify(shuffledLinks));
+            document.getElementById('buttonContainer').style.display = 'none';
+            // Reset the simulation UI to its initial state
+            document.getElementById('simulation').innerHTML = `
+                <p id="currentUrl" class="mb-3"></p>
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-primary" onclick="guess(true)">Yes (Phishing)</button>
+                    <button class="btn btn-primary" onclick="guess(false)">No (Safe)</button>
+                </div>
+            `;
+            document.getElementById('simulation').style.display = 'block';
+            document.getElementById('resetButton').style.display = 'inline-block';
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('feedback').innerHTML = '';
+            showCurrentUrl();
+        }
+
+        function startTimer() {
+            let timeLeft = 30;
+            document.getElementById('timer').textContent = timeLeft;
+            timerId = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    nextQuestion(false);
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerId) clearInterval(timerId);
+        }
+
+        function showCurrentUrl() {
+            if (currentIndex >= selectedQuestions) {
+                stopTimer();
+                document.getElementById("simulation").innerHTML = `
+                    <div class="score-container">
+                        <p>Simulation Complete!</p>
+                        <p>Score: ${correctGuesses} out of ${selectedQuestions}</p>
+                    </div>
+                `;
+                document.getElementById('feedback').innerHTML = '';
+                document.getElementById('resetButton').style.display = 'inline-block';
+                return;
+            }
+            const shuffledLinks = JSON.parse(localStorage.getItem('simulationLinks'));
+            document.getElementById("currentUrl").innerHTML = `URL: ${shuffledLinks[currentIndex].url}`;
+            document.getElementById("feedback").innerHTML = "";
+            stopTimer();
+            startTimer();
+            document.getElementById('progress').textContent = `Question ${currentIndex + 1} of ${selectedQuestions}`;
+            document.querySelectorAll("#simulation button").forEach(button => button.disabled = false);
+        }
+
+        async function guess(guess) {
+            stopTimer();
+            const shuffledLinks = JSON.parse(localStorage.getItem('simulationLinks'));
+            const url = shuffledLinks[currentIndex].url;
+            const isPhishing = shuffledLinks[currentIndex].is_phishing;
+            let correct = guess === isPhishing;
+
+            try {
+                console.log(`Sending guess for URL: ${url}, guess=${guess}`);
+                const response = await fetch("/simulation/guess", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: url, guess: guess })
+                });
+                console.log("Response status:", response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const feedback = await response.json();
+                console.log("Feedback received:", feedback);
+
+                if (feedback.error) {
+                    document.getElementById("feedback").innerHTML = `<p class="text-danger">${feedback.error}</p>`;
+                    return;
+                }
+
+                if (!feedback.result || !feedback.result.risk_category || !feedback.result.findings) {
+                    throw new Error("Invalid feedback response: missing result data");
+                }
+
+                let html = `<p>${feedback.message}</p>`;
+                html += `<p>LinkGuard Result: Risk: ${feedback.result.risk_category}`;
+                if (feedback.result.threat_type) {
+                    html += ` (Threat Type: ${feedback.result.threat_type.charAt(0).toUpperCase() + feedback.result.threat_type.slice(1)})`;
+                }
+                html += `</p>`;
+                html += `<p>Details:</p><ul>`;
+                for (const [check, value] of Object.entries(feedback.result.findings)) {
+                    html += `<li>${check}: ${value ? "⚠️ Detected" : "✅ Safe"}</li>`;
+                }
+                html += `</ul>`;
+                if (feedback.threat_report) {
+                    html += `<h3>Threat Report</h3>`;
+                    html += `<pre>${feedback.threat_report}</pre>`;
+                    
+                }
+                if (feedback.achievement) {
+                    html += `<p class="text-success">Achievement Unlocked: ${feedback.achievement}</p>`;
+                }
+                html += `<button class="btn btn-primary mt-2" onclick="nextQuestion(${correct})">OK</button>`;
+                document.getElementById("feedback").innerHTML = html;
+
+                if (correct) correctGuesses++;
+                document.querySelectorAll("#simulation button").forEach(button => button.disabled = true);
+            } catch (error) {
+                console.error("Error in guess:", error);
+                document.getElementById("feedback").innerHTML = `<p class="text-danger">Error: ${error.message}</p><button class="btn btn-primary mt-2" onclick="nextQuestion(false)">OK</button>`;
+                document.querySelectorAll("#simulation button").forEach(button => button.disabled = true);
+            }
+        }
+
+        function nextQuestion(isCorrect) {
+            currentIndex++;
+            showCurrentUrl();
+        }
+
+        function resetSimulation() {
+            currentIndex = 0;
+            correctGuesses = 0;
+            stopTimer();
+            document.getElementById('simulation').style.display = 'none';
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('resetButton').style.display = 'none';
+            document.getElementById('progress').style.display = 'none';
+            document.getElementById('buttonContainer').style.display = 'flex';
+            localStorage.removeItem('simulationLinks');
+        }
+
+        // Dark Mode Toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const body = document.body;
+            const isLightMode = body.classList.toggle('light-mode');
+            localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+            document.getElementById('themeToggle').textContent = isLightMode ? 'Toggle Dark Mode' : 'Toggle Light Mode';
+        });
+
+        // Apply saved theme on page load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            document.getElementById('themeToggle').textContent = 'Toggle Dark Mode';
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9315cd6b5925ade4',t:'MTc0NDgyODczNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9326914dfe088bb9',t:'MTc0NTAwNDUzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

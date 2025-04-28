@@ -1,0 +1,320 @@
+/* Define CSS Variables for Themes */
+:root {
+    --background-color: #333333; /* Dark matte gray */
+    --text-color: #FFFFFF; /* White */
+    --card-bg: #2E2E2E; /* Darker gray for cards */
+    --btn-primary-bg: #03a5b1; /* Primary button */
+    --btn-primary-border: #03a5b1;
+    --btn-primary-hover-bg: #666666;
+    --btn-secondary-bg: #555555; /* Matte gray buttons */
+    --btn-secondary-border: #555555;
+    --btn-secondary-hover-bg: #666666;
+    --risk-high: #FF0000;
+    --risk-medium: #FFA500;
+    --risk-low: #00FF00;
+}
+
+body.light-mode {
+    --background-color: #FFFFFF; /* White */
+    --text-color: #333333; /* Dark gray */
+    --card-bg: #F5F5F5; /* Light gray for cards */
+    --btn-primary-bg: #03a5b1;
+    --btn-primary-border: #03a5b1;
+    --btn-primary-hover-bg: #028a94;
+    --btn-secondary-bg: #CCCCCC;
+    --btn-secondary-border: #CCCCCC;
+    --btn-secondary-hover-bg: #BBBBBB;
+    --risk-high: #FF0000;
+    --risk-medium: #FFA500;
+    --risk-low: #00FF00;
+}
+
+/* Apply Variables */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    padding: 20px;
+    margin: 0;
+}
+h1 {
+    color: var(--text-color);
+    font-size: 36px;
+    font-family: 'Roboto', sans-serif;
+}
+h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+h3 {
+    font-size: 16px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+.risk-high { color: var(--risk-high); }
+.risk-medium { color: var(--risk-medium); }
+.risk-low { color: var(--risk-low); }
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+li {
+    margin: 5px 0;
+}
+pre {
+    background-color: var(--card-bg);
+    padding: 10px;
+    border-radius: 4px;
+    text-align: left;
+    white-space: pre-wrap;
+    margin: 10px 0;
+    color: var(--text-color);
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-border);
+    color: var(--text-color);
+}
+.btn-primary:hover {
+    background-color: var(--btn-primary-hover-bg);
+    border-color: var(--btn-primary-hover-bg);
+}
+.btn-secondary {
+    background-color: var(--btn-secondary-bg);
+    border-color: var(--btn-secondary-border);
+    color: var(--text-color);
+}
+.btn-secondary:hover {
+    background-color: var(--btn-secondary-hover-bg);
+    border-color: var(--btn-secondary-hover-bg);
+}
+.btn-outline-primary {
+    border-color: var(--btn-secondary-bg);
+    color: var(--text-color);
+}
+.btn-outline-primary:hover {
+    background-color: var(--btn-secondary-hover-bg);
+    border-color: var(--btn-secondary-hover-bg);
+}
+
+/* Chatbot Styling */
+.chat-messages {
+    background-color: var(--card-bg);
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+.chat-messages p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+.chat-messages .user-message {
+    color: #FFD700;
+}
+.chat-messages .bot-message {
+    color: var(--text-color);
+}
+
+/* Score Display */
+#score {
+    color: var(--risk-low);
+    font-weight: bold;
+}
+.safety-score {
+    font-size: 18px;
+    color: var(--text-color);
+}
+
+/* Admin Page Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    margin: 20px 0;
+}
+th, td {
+    padding: 10px;
+    border: 1px solid #4A90E2;
+    text-align: left;
+    color: var(--text-color);
+}
+th {
+    background-color: #4A90E2;
+    color: var(--text-color);
+}
+tr:nth-child(even) {
+    background-color: var(--card-bg);
+}
+#riskChart {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Threat Report Styling */
+.card.bg-secondary {
+    background-color: #4A4A4A !important;
+}
+.card-body ul {
+    padding-left: 20px;
+}
+
+/* URL Truncation */
+.url-truncate {
+    display: inline-block;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+/* QR Scanner Styling */
+#qrVideo {
+    border: 2px solid #4A90E2;
+    border-radius: 4px;
+}
+
+/* Gold Buttons */
+.btn-gold {
+    background-color: #FFD700;
+    border-color: #FFD700;
+    color: #333333; /* Always dark for contrast against gold */
+}
+.btn-gold:hover {
+    background-color: #E6C200;
+    border-color: #E6C200;
+}
+
+/* Bright Red Outline for View Threat Report Button */
+.btn-threat-report {
+    background-color: var(--btn-secondary-bg);
+    border: 2px solid #FF0000; /* Bright red outline */
+    color: var(--text-color);
+}
+.btn-threat-report:hover {
+    background-color: var(--btn-secondary-hover-bg);
+    border-color: #FF3333; /* Slightly lighter red on hover */
+}
+
+/* Card Styling */
+.card.bg-dark {
+    background-color: var(--card-bg) !important;
+}
+
+/* Modal Styling */
+.modal-content.bg-dark {
+    background-color: var(--card-bg) !important;
+}
+.modal-content.bg-dark .modal-header,
+.modal-content.bg-dark .modal-body,
+.modal-content.bg-dark .modal-footer {
+    color: var(--text-color);
+}
+.btn-close-white {
+    filter: brightness(0) invert(1); /* Ensure close button is visible in dark mode */
+}
+body.light-mode .btn-close-white {
+    filter: none; /* Default in light mode */
+}
+
+/* Loading Spinner */
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #FFD700;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    display: none;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Intro.js Overrides */
+.introjs-tooltip {
+    color: #000000 !important; /* Black text for tutorial */
+}
+.introjs-tooltip-title,
+.introjs-tooltiptext,
+.introjs-button {
+    color: #000000 !important;
+}
+
+/* Simulation Page Styling */
+.timer {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--text-color);
+    font-weight: bold;
+}
+.progress-indicator {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: var(--text-color);
+    font-weight: bold;
+}
+.question-container {
+    font-size: 20px;
+    text-align: center;
+    margin-top: 50px;
+    color: var(--text-color);
+}
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 50px;
+}
+.card-body {
+    position: relative;
+    padding-top: 40px; /* Space for progress and timer */
+}
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.score-container {
+    font-size: 20px;
+    text-align: center;
+    margin-top: 50px;
+    color: var(--text-color);
+}
+
+/* Scan Result Styling */
+.scan-result {
+    color: var(--text-color);
+}
+.scan-result p, .scan-result ul, .scan-result li, .scan-result h3, .scan-result pre {
+    color: var(--text-color);
+}
+
+/* Login Page Styling */
+.card {
+    background-color: #fff; /* White background for login card in light mode */
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+}
+body.light-mode .card {
+    background-color: #fff;
+}
+body:not(.light-mode) .card {
+    background-color: var(--card-bg);
+    border-color: #4A90E2;
+}
+.card-body {
+    padding: 20px;
+}
+.form-label {
+    color: var(--text-color);
+}

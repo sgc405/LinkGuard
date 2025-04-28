@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkGuard Scanner</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts for Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Intro.js CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/intro.js@7.0.0/minified/introjs.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between gap-2 mb-3">
+            <!-- Left: Theme Toggle -->
+            <div>
+                <button id="themeToggle" class="btn btn-secondary">
+                    {% if session.get('user_logged_in') %}
+                        Toggle Light/Dark Mode
+                    {% else %}
+                        Toggle Light Mode
+                    {% endif %}
+                </button>
+            </div>
+            <!-- Right: Conditional Buttons -->
+            <div class="d-flex gap-2">
+                {% if not session.get('user_logged_in') %}
+                <!-- Not Logged In: Show Contact Us and Admin Dashboard -->
+                <a href="/contact" class="btn btn-gold">Contact Us</a>
+                <a href="/admin" class="btn btn-gold">Admin Dashboard</a>
+                {% else %}
+                <!-- Logged In: Show Logout -->
+                <a href="/user_logout" class="btn btn-danger">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+        <script>
+            window.currentUsername = '{{ session.username | default('', true) }}';
+        </script>
+        <h1 class="text-center mb-5">LinkGuard Scanner</h1>
+        <div class="d-flex justify-content-center gap-2 mb-5">
+            {% if session.get('user_logged_in') %}
+            <a href="/simulation" class="btn btn-gold" data-intro="Test your phishing detection skills with our simulation!" data-step="1">Simulator Access</a>
+            <a href="/user_dashboard" class="btn btn-gold" data-intro="View previously scanned links." data-step="2">Scanned History</a>
+            {% endif %}
+            <button class="btn btn-secondary" onclick="startTour()">Take a Tour</button>
+        </div>
+        {% if not session.get('user_logged_in') %}
+        <div class="d-flex justify-content-center gap-2 mb-5">
+            <a href="/register" class="btn btn-primary" data-intro="Register to access scanned links history and educational questionnaires." data-step="5">Register</a>
+            <a href="/user_login" class="btn btn-primary" data-intro="Login if you already have an account." data-step="6">Login</a>
+        </div>
+        {% endif %}
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-body">
+                <p class="card-text safety-score">Safety Score: <span id="score" class="text-success" data-intro="Your Safety Score updates with each scan. Start scanning to improve it!" data-step="3">0 | Please scan a link</span></p>
+            </div>
+        </div>
+        <form id="scanForm" onsubmit="scanURL(event)" class="mb-4">
+            <div class="input-group" data-intro="Enter a URL here to scan for phishing risks." data-step="4">
+                <input type="text" id="urlInput" name="url" class="form-control" placeholder="Enter URL to scan" required>
+                <button type="submit" class="btn btn-primary" data-intro="Click to scan the URL for potential threats." data-step="5">Scan</button>
+            </div>
+        </form>
+        <!-- QR Code Scanning Section -->
+        <div class="mb-4">
+            <button class="btn btn-primary" onclick="startQRScanner()" data-intro="Scan a QR code to check if it leads to a safe URL." data-step="6">Scan QR Code</button>
+            <div id="qrScanner" class="mt-3 d-none">
+                <video id="qrVideo" class="img-fluid" style="max-width: 100%;"></video>
+                <canvas id="qrCanvas" class="d-none"></canvas>
+                <button class="btn btn-danger mt-2" onclick="stopQRScanner()">Stop Scanning</button>
+            </div>
+        </div>
+        <div id="result" class="card bg-dark text-white" data-intro="Your scan results will appear here, including risk level and details." data-step="7">
+            <div class="card-body">
+                <div class="d-flex justify-content-end mb-2">
+                    <button class="btn btn-secondary btn-sm" onclick="clearResults()">Clear Results</button>
+                </div>
+                <div id="resultContent"></div>
+                <div id="loadingSpinner" class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="container mt-4">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <h2 class="card-title" data-intro="Chat with our AI assistant to learn more about phishing and how to use LinkGuard." data-step="8">Chat with LinkGuard</h2>
+                <div id="chatMessages" class="chat-messages"></div>
+                <div class="chat-options d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-outline-primary" onclick="sendChatMessage('What are the types of phishing?')">What are the types of phishing?</button>
+                    <button class="btn btn-outline-primary" onclick="sendChatMessage('How to use this?')">How to use this?</button>
+                    <button class="btn btn-outline-primary" onclick="sendChatMessage('What is phishing?')">What is phishing?</button>
+                </div>
+                <div class="chat-input d-flex gap-2">
+                    <input type="text" id="chatInput" class="form-control" placeholder="Type a message..." onkeypress="if(event.keyCode===13) sendChatMessage(this.value)">
+                    <button class="btn btn-primary" onclick="sendChatMessage(document.getElementById('chatInput').value)">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <!-- jsQR Library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <!-- Intro.js JS -->
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@7.0.0/minified/intro.min.js"></script>
+    <script src="/static/script.js"></script>
+    <script>
+        function startTour() {
+            const steps = [
+                { element: document.querySelector('#themeToggle'), intro: "Toggle between light and dark mode for a comfortable viewing experience." },
+                {% if not session.get('user_logged_in') %}
+                { element: document.querySelector('a[href="/contact"]'), intro: "Contact us for support or inquiries." },
+                { element: document.querySelector('a[href="/admin"]'), intro: "View and manage scan history in the Admin Dashboard (admin only)." },
+                {% else %}
+                { element: document.querySelector('a[href="/user_logout"]'), intro: "Log out of your account when you're done." },
+                { element: document.querySelector('a[href="/simulation"]'), intro: "Test your phishing detection skills with our simulation!" },
+                { element: document.querySelector('a[href="/user_dashboard"]'), intro: "View previously scanned links." },
+                {% endif %}
+                { element: document.querySelector('#score'), intro: "Your Safety Score updates with each scan. Start scanning to improve it!" },
+                { element: document.querySelector('#urlInput'), intro: "Enter a URL here to scan for phishing risks." },
+                { element: document.querySelector('#scanForm button'), intro: "Click to scan the URL for potential threats." },
+                { element: document.querySelector('button[onclick="startQRScanner()"]'), intro: "Scan a QR code to check if it leads to a safe URL." },
+                { element: document.querySelector('#result'), intro: "Your scan results will appear here, including risk level and details." },
+                { element: document.querySelector('#chatMessages'), intro: "Chat with our AI assistant to learn more about phishing and how to use LinkGuard." },
+                {% if not session.get('user_logged_in') %}
+                { element: document.querySelector('a[href="/register"]'), intro: "Register to access scanned links history and educational questionnaires." },
+                { element: document.querySelector('a[href="/user_login"]'), intro: "Login if you already have an account." },
+                {% endif %}
+            ].filter(step => step.element); // Filter out steps where the element doesn't exist
+            introJs().setOptions({ steps }).start();
+        }   
+
+        // Dark Mode Toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const body = document.body;
+            const isLightMode = body.classList.toggle('light-mode');
+            localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+            document.getElementById('themeToggle').textContent = isLightMode ? 'Toggle Dark Mode' : 'Toggle Light Mode';
+        });
+
+        // Apply saved theme on page load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            document.getElementById('themeToggle').textContent = 'Toggle Dark Mode';
+        }
+
+        function clearResults() {
+            const resultContent = document.getElementById("resultContent");
+            resultContent.innerHTML = "";
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9315cd6d183e4563',t:'MTc0NDgyODczNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9326914dfe8cdd1a',t:'MTc0NTAwNDUzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
